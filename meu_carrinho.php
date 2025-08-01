@@ -24,6 +24,8 @@ $stmt->execute([$cli_codigo]);
 $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -41,7 +43,7 @@ $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <thead>
                 <tr>
                     <th>Produto</th>
-                    <th>Tipo</th>
+                    <th>Tipo de Produto</th>
                     <th>Quantidade</th>
                     <th>Data Início</th>
                     <th>Data Fim</th>
@@ -53,7 +55,7 @@ $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php foreach ($itens as $item): ?>
                     <tr>
                         <td><?= htmlspecialchars($item['prod_nome']) ?></td>
-                        <td><?= htmlspecialchars($item['car_tipo']) ?></td>
+                        <td><?= htmlspecialchars($item['prod_tipo']) ?></td>
                         <td><?= $item['car_tipo'] === 'compra' ? $item['car_quantidade'] : '-' ?></td>
                         <td><?= $item['car_tipo'] === 'locacao' ? $item['car_data_inicio_locacao'] : '-' ?></td>
                         <td><?= $item['car_tipo'] === 'locacao' ? $item['car_data_fim_locacao'] : '-' ?></td>
