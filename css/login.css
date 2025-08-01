@@ -1,0 +1,131 @@
+body {
+    font-family:  'Inter', sans-serif;
+    background-color: #E9ECEF;
+    background-size: auto;
+    background-repeat: no-repeat;
+    margin: 0;
+}
+
+.container {
+    max-width: 450px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #fff6f6;
+    border-radius: 10px;
+    box-shadow: 0 0 25px #180e04;
+}
+
+h1 {
+    margin-left: 20px;
+    text-align: left;
+    color: #000000;
+}
+
+/*inputs*/
+.form-group {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.form-group label {
+    color: #000000;
+    font-weight: 500;
+    align-self: flex-start;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #000000;
+    background-color: #fff6f6;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group button {
+    align-self: center;
+}
+
+form .form-group p, 
+form .form-group span {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+form .form-group a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+form .form-group a:hover {
+  text-decoration: underline;
+}
+
+/*Botão*/
+button[type="submit"] {
+    
+    width: 100%;
+    height: 48px;
+    background-color: #588157;
+    color: #E9ECEF;
+}
+
+
+button[type="submit"]:hover {
+    background-color: #4AAD47;
+}
+
+header {
+    background-color: #588157;
+    height: 80px;
+    max-height: 80px;
+    display: flex; /* Make the header a flex container */
+    justify-content: flex-start; /* Align items to the start (left) */
+    align-items: center; /* Vertically center the image if needed */
+    padding-left: 20px; /* Add some padding on the left if desired */
+}
+
+header img {
+    height: 54px; /* Keep the height fixed */
+    width: auto; /* Allow the width to adjust based on content, or set a specific width */
+    /* object-fit: contain; */ /* You might not need this anymore if you set a specific width or rely on auto */
+}
+
+
+.mensagem {
+    margin-top: 10px;
+    color: red;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+  }
+
+  .modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 0 10px black;
+  }
+
+  .modal-content button {
+    margin-top: 10px;
+    padding: 5px 10px;
+  }

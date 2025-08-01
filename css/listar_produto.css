@@ -1,0 +1,16 @@
+.produto {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .produto img {
+            max-width: 150px;
+            max-height: 150px;
+            object-fit: cover;
+        }
+        .detalhes {
+            flex: 1;
+        }

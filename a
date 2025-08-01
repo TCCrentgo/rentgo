@@ -1,0 +1,39 @@
+-- Corrigir tipo da coluna modelo_nome em modelo
+ALTER TABLE modelo
+  MODIFY COLUMN modelo_nome VARCHAR(50) NOT NULL;
+
+-- Adicionar coluna cat_codigo em marca
+ALTER TABLE marca
+  ADD COLUMN cat_codigo INT(11) NOT NULL AFTER marca_nome;
+
+-- Criar FK entre marca.cat_codigo e categoria.cat_codigo
+ALTER TABLE marca
+  ADD CONSTRAINT fk_marca_categoria FOREIGN KEY (cat_codigo) REFERENCES categoria(cat_codigo);
+
+-- Garantir FK entre modelo.marca_codigo e marca.marca_codigo (se não existir)
+ALTER TABLE modelo
+  ADD CONSTRAINT fk_marca_modelo FOREIGN KEY (marca_codigo) REFERENCES marca(marca_codigo);
+
+-- Inserir dados em categoria (se ainda não inseridos)
+INSERT INTO categoria (cat_codigo, cat_nome) VALUES
+  (1, 'Roupas'),
+  (2, 'Eletrônicos'),
+  (3, 'Automóveis'),
+  (4, 'Imóveis')
+ON DUPLICATE KEY UPDATE cat_nome = VALUES(cat_nome);
+
+-- Inserir dados em marca
+INSERT INTO marca (marca_codigo, marca_nome, cat_codigo) VALUES
+  (1, 'Samsung', 2),
+  (2, 'Apple', 2),
+  (3, 'Nike', 1),
+  (4, 'Toyota', 3)
+ON DUPLICATE KEY UPDATE marca_nome = VALUES(marca_nome), cat_codigo = VALUES(cat_codigo);
+
+-- Inserir dados em modelo
+INSERT INTO modelo (modelo_codigo, modelo_nome, marca_codigo) VALUES
+  (1, 'Galaxy S21', 1),
+  (2, 'iPhone 13', 2),
+  (3, 'Air Max 90', 3),
+  (4, 'Corolla', 4)
+ON DUPLICATE KEY UPDATE modelo_nome = VALUES(modelo_nome), marca_codigo = VALUES(marca_codigo);

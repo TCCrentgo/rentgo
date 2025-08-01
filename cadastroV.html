@@ -1,0 +1,133 @@
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="css/cadastro.css">
+  <link rel="shortcut icon" type="imagex/png" href="imgs/minilogo.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+    
+    .mensagem {
+      margin-top: 10px;
+      color: red;
+    }
+
+    /* Modal popup */
+    .modal {
+      display: none; /* escondido por padrão */
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0 0 10px black;
+    }
+
+    .modal-content button {
+      margin-top: 10px;
+      padding: 5px 10px;
+    }
+
+    
+  </style>
+  <title>RentGo - Cadastro</title>
+</head>
+
+<body>
+  <header>
+    <img src="RentGO_logo.png" alt="RentGO">
+  </header>
+  <div class="container">
+    <h1>Cadastro de Cliente</h1>
+    
+    
+    <form id="cadastroFormCliente">
+      <div class="form-group">
+
+        <label for="vend_nome">Nome de usuário:</label>
+        <input type="text" name="vend_nome" placeholder="Nome" required>
+    
+        <label for="vend_email">E-mail:</label>
+        <input type="email" name="vend_email" placeholder="E-mail" required>
+    
+        <label for="vend_senha">Senha:</label>
+        <input type="password" name="vend_senha" placeholder="Senha" required>
+    
+        <label for="vend_cpf_cnpj">CPF:</label>
+        <input type="text" name="vend_cpf_cnpj" placeholder="CPF" required>
+    
+        <label for="vend_telefone">Telefone:</label>
+        <input type="text" name="vend_telefone" placeholder="Telefone" required>
+    
+        <label for="vend_endereco">Endereço:</label>
+        <input type="text" name="vend_endereco" placeholder="Endereço" required>
+    
+        <label for="vend_datanasc">Data de Nascimento:</label>
+        <input type="date" name="vend_datanasc" required>
+    
+        <button type="submit">Cadastrar</button>
+        <span>Já tem conta? <a href="login.php">Fazer Login</a></span>
+      </div>
+    </form>
+
+    <div id="mensagem" class="mensagem"></div>
+  <div id="popupModal" class="modal">
+    <div class="modal-content">
+      <p>✅ Cadastro concluído com sucesso!</p>
+      <button onclick="fecharModal()">OK</button>
+    </div>
+  </div>
+
+  </div>
+    
+ 
+  
+    <script>
+      const form = document.getElementById('cadastroFormCliente');
+      const mensagem = document.getElementById('mensagem');
+      const modal = document.getElementById('popupModal');
+  
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+  
+        fetch('php/proc_cadastroV.php', {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.text())
+        .then(data => {
+          if (data.trim() === 'sucesso') {
+            mensagem.textContent = "";
+            form.reset();
+            modal.style.display = 'block';
+          }       else {
+            mensagem.textContent = data; // mostra a mensagem de erro exata
+                        }
+})
+        .catch(() => {
+          mensagem.textContent = "Erro de conexão.";
+        });
+      });
+  
+      function fecharModal() {
+        modal.style.display = "none";
+        window.location.href = "login.php"; // redireciona após clicar em OK
+      }
+    </script>
+  
+</body>
+</html>

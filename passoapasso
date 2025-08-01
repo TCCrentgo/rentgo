@@ -1,0 +1,371 @@
+INSERT INTO Categoria (cat_nome) VALUES
+('Roupas'),
+('Eletrônicos'),
+('Automóveis'),
+('Imóveis');
+
+
+--selecionar_categoria.php
+<?php
+// Dados fixos para este exemplo
+$categorias = [
+    ['cat_codigo' => 1, 'cat_nome' => 'Roupas'],
+    ['cat_codigo' => 2, 'cat_nome' => 'Eletrônicos'],
+    ['cat_codigo' => 3, 'cat_nome' => 'Automóveis'],
+    ['cat_codigo' => 4, 'cat_nome' => 'Imóveis'],
+];
+?>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Selecionar Categoria</title>
+</head>
+<body>
+    <h1>Selecione a Categoria do Produto</h1>
+    <ul>
+        <?php foreach ($categorias as $cat): ?>
+            <li><a href="cadastro_produto.php?cat_codigo=<?= $cat['cat_codigo'] ?>"><?= htmlspecialchars($cat['cat_nome']) ?></a></li>
+        <?php endforeach; ?>
+    </ul>
+</body>
+</html>
+
+
+
+--cadastro_produto.php
+
+<?php
+$cat_codigo = $_GET['cat_codigo'] ?? null;
+
+if (!$cat_codigo || !in_array($cat_codigo, [1,2,3,4])) {
+    die("Categoria inválida.");
+}
+
+$categorias = [
+    1 => 'Roupas',
+    2 => 'Eletrônicos',
+    3 => 'Automóveis',
+    4 => 'Imóveis',
+];
+
+// Marcas e modelos fixos (exemplo simplificado)
+$marcasModelos = [
+    1 => [ // Roupas
+        'Nike' => ['Air Max', 'Camiseta', 'Calça'],
+        'Adidas' => ['UltraBoost', 'Regata', 'Shorts'],
+    ],
+    2 => [ // Eletrônicos
+        'Apple' => ['iPhone 13', 'MacBook Pro', 'iPad'],
+        'Samsung' => ['Galaxy S22', 'Galaxy Tab', 'Notebook'],
+    ],
+    3 => [ // Automóveis
+        'Ford' => ['Fiesta', 'Focus', 'EcoSport'],
+        'Chevrolet' => ['Onix', 'Cruze', 'Tracker'],
+    ],
+    4 => [ // Imóveis
+        'Apartamento' => ['2 quartos', '3 quartos', 'Cobertura'],
+        'Casa' => ['Simples', 'Com Piscina', 'Sítio'],
+    ],
+];
+
+$marcas = array_keys($marcasModelos[$cat_codigo]);
+?>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Cadastro de Produto - <?= htmlspecialchars($categorias[$cat_codigo]) ?></title>
+    <script>
+        const marcasModelos = <?= json_encode($marcasModelos[$cat_codigo]) ?>;
+        function carregarModelos() {
+            const marcaSelect = document.getElementById('marca');
+            const modeloSelect = document.getElementById('modelo');
+            const marcaSelecionada = marcaSelect.value;
+
+            // Limpa modelos
+            modeloSelect.innerHTML = '';
+
+            if (marcaSelecionada && marcasModelos[marcaSelecionada]) {
+                marcasModelos[marcaSelecionada].forEach(modelo => {
+                    const option = document.createElement('option');
+                    option.value = modelo;
+                    option.textContent = modelo;
+                    modeloSelect.appendChild(option);
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Cadastro de Produto - <?= htmlspecialchars($categorias[$cat_codigo]) ?></h1>
+    <form action="cadastro_produto_salvar.php" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="cat_codigo" value="<?= $cat_codigo ?>" />
+
+        <label for="marca">Marca:</label><br>
+        <select name="marca" id="marca" required onchange="carregarModelos()">
+            <option value="">--Selecione a Marca--</option>
+            <?php foreach ($marcas as $marca): ?>
+                <option value="<?= htmlspecialchars($marca) ?>"><?= htmlspecialchars($marca) ?></option>
+            <?php endforeach; ?>
+        </select><br><br>
+
+        <label for="modelo">Modelo:</label><br>
+        <select name="modelo" id="modelo" required>
+            <option value="">--Selecione o Modelo--</option>
+            <!-- modelos serão carregados pelo JS -->
+        </select><br><br>
+
+        <label for="descricao">Descrição:</label><br>
+        <textarea name="descricao" id="descricao" required maxlength="200"></textarea><br><br>
+
+        <label for="valor">Valor (R$):</label><br>
+        <input type="number" step="0.01" name="valor" id="valor" required><br><br>
+
+        <label for="imagem">Imagem do Produto:</label><br>
+        <input type="file" name="imagem" id="imagem" accept="image/*" required><br><br>
+
+        <input type="submit" value="Cadastrar Produto">
+    </form>
+    <br>
+    <a href="selecionar_categoria.php">Voltar para Categorias</a>
+
+    <script>
+        // Inicializa modelo vazio
+        carregarModelos();
+    </script>
+</body>
+</html>
+
+
+--cadastro_produto_salvar.php
+
+<?php
+$host = "localhost";
+$dbname = "rentgo";
+$username = "root";
+$password = "";
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die("Método inválido.");
+}
+
+$cat_codigo = $_POST['cat_codigo'] ?? null;
+$marca = $_POST['marca'] ?? '';
+$modelo = $_POST['modelo'] ?? '';
+$descricao = $_POST['descricao'] ?? '';
+$valor = $_POST['valor'] ?? '';
+
+if (!$cat_codigo || !$marca || !$modelo || !$descricao || !$valor) {
+    die("Todos os campos são obrigatórios.");
+}
+
+if (!isset($_FILES['imagem']) || $_FILES['imagem']['error'] != UPLOAD_ERR_OK) {
+    die("Erro no upload da imagem.");
+}
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Definir pasta de uploads
+    $uploadDir = __DIR__ . '/uploads/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    // Gerar nome único para a imagem
+    $ext = pathinfo($_FILES['imagem']['name'], PATHINFO_EXTENSION);
+    $nomeImagem = uniqid('prod_') . "." . $ext;
+    $caminhoImagem = $uploadDir . $nomeImagem;
+
+    if (!move_uploaded_file($_FILES['imagem']['tmp_name'], $caminhoImagem)) {
+        die("Falha ao salvar imagem.");
+    }
+
+    // Salvar caminho relativo para o banco (ex: uploads/prod_abc123.jpg)
+    $caminhoImagemDB = "uploads/" . $nomeImagem;
+
+    // Mapear cat_codigo para nome categoria
+    $categorias = [
+        1 => 'Roupas',
+        2 => 'Eletrônicos',
+        3 => 'Automóveis',
+        4 => 'Imóveis',
+    ];
+
+    $prod_tipo = $categorias[$cat_codigo] ?? 'Outros';
+    $prod_nome = $marca . " " . $modelo;
+    $prod_descricao = $descricao;
+    $prod_valor = floatval($valor);
+    $prod_disponivel = "Sim";
+    $prod_datacriacao = date('Y-m-d H:i:s');
+    $vend_codigo = 1; // Hardcoded para exemplo, alterar conforme usuário logado
+
+    $sql = "INSERT INTO produtos_servicos 
+        (prod_nome, prod_descricao, prod_valor, prod_tipo, prod_disponivel, prod_datacriacao, vend_codigo, cat_codigo, prod_imagem)
+        VALUES
+        (:nome, :descricao, :valor, :tipo, :disponivel, :datacriacao, :vend, :cat, :imagem)";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ':nome' => $prod_nome,
+        ':descricao' => $prod_descricao,
+        ':valor' => $prod_valor,
+        ':tipo' => $prod_tipo,
+        ':disponivel' => $prod_disponivel,
+        ':datacriacao' => $prod_datacriacao,
+        ':vend' => $vend_codigo,
+        ':cat' => $cat_codigo,
+        ':imagem' => $caminhoImagemDB
+    ]);
+
+    echo "Produto cadastrado com sucesso! <a href='selecionar_categoria.php'>Cadastrar outro</a>";
+
+} catch (PDOException $e) {
+    die("Erro ao salvar produto: " . $e->getMessage());
+}
+?>
+
+
+
+
+<script>
+    // Dados de marcas e modelos (exemplo — isso pode vir do PHP via JSON também)
+    const marcasModelos = {
+        "Apple": ["iPhone 13", "MacBook Pro", "iPad Air"],
+        "Samsung": ["Galaxy S23", "Galaxy Tab S8", "Smart TV 4K"],
+        "LG": ["Monitor UltraWide", "Smart TV", "Notebook Gram"]
+    };
+
+    // Função que popula o select de modelos com base na marca selecionada
+    function carregarModelos() {
+        const marcaSelect = document.getElementById("marca");
+        const modeloSelect = document.getElementById("modelo");
+
+        const marcaSelecionada = marcaSelect.value;
+
+        // Limpa os modelos atuais
+        modeloSelect.innerHTML = "<option value=''>-- Selecione o Modelo --</option>";
+
+        if (marcaSelecionada && marcasModelos[marcaSelecionada]) {
+            marcasModelos[marcaSelecionada].forEach(modelo => {
+                const option = document.createElement("option");
+                option.value = modelo;
+                option.textContent = modelo;
+                modeloSelect.appendChild(option);
+            });
+        }
+    }
+
+    // Chama a função ao carregar a página (caso tenha marca pré-selecionada)
+    window.onload = carregarModelos;
+</script>
+
+
+
+
+
+<?php
+// conexão
+$pdo = new PDO("mysql:host=localhost;dbname=rentgo;charset=utf8mb4", "root", "");
+
+// pega categoria
+$cat_codigo = $_GET['cat_codigo'] ?? null;
+if (!$cat_codigo) die("Categoria inválida.");
+
+// busca marcas por categoria
+$stmt = $pdo->prepare("SELECT id, nome FROM marcas WHERE cat_codigo = ?");
+$stmt->execute([$cat_codigo]);
+$marcas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro de Produto</title>
+</head>
+<body>
+
+<h1>Cadastro de Produto</h1>
+
+<form action="cadastro_produto_salvar.php" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="cat_codigo" value="<?= $cat_codigo ?>">
+
+  <label for="marca">Marca:</label><br>
+  <select name="marca" id="marca" required>
+    <option value="">-- Selecione a Marca --</option>
+    <?php foreach ($marcas as $marca): ?>
+      <option value="<?= $marca['id'] ?>"><?= htmlspecialchars($marca['nome']) ?></option>
+    <?php endforeach; ?>
+  </select><br><br>
+
+  <label for="modelo">Modelo:</label><br>
+  <select name="modelo" id="modelo" required>
+    <option value="">-- Selecione o Modelo --</option>
+  </select><br><br>
+
+  <label for="descricao">Descrição:</label><br>
+  <textarea name="descricao" required></textarea><br><br>
+
+  <label for="valor">Valor (R$):</label><br>
+  <input type="number" name="valor" step="0.01" required><br><br>
+
+  <label for="imagem">Imagem:</label><br>
+  <input type="file" name="imagem" accept="image/*" required><br><br>
+
+  <input type="submit" value="Cadastrar Produto">
+</form>
+
+<script>
+// evento ao mudar marca
+document.getElementById("marca").addEventListener("change", function () {
+  const marcaId = this.value;
+  const modeloSelect = document.getElementById("modelo");
+
+  modeloSelect.innerHTML = "<option value=''>Carregando...</option>";
+
+  fetch("get_modelos.php?marca_id=" + marcaId)
+    .then(response => response.json())
+    .then(data => {
+      modeloSelect.innerHTML = "<option value=''>-- Selecione o Modelo --</option>";
+      data.forEach(modelo => {
+        const opt = document.createElement("option");
+        opt.value = modelo.nome;
+        opt.textContent = modelo.nome;
+        modeloSelect.appendChild(opt);
+      });
+    });
+});
+</script>
+
+</body>
+</html>
+
+
+
+
+<?php
+header('Content-Type: application/json');
+
+$marca_id = $_GET['marca_id'] ?? null;
+
+if (!$marca_id) {
+    echo json_encode([]);
+    exit;
+}
+
+try {
+    $pdo = new PDO("mysql:host=localhost;dbname=rentgo;charset=utf8mb4", "root", "");
+    $stmt = $pdo->prepare("SELECT nome FROM modelos WHERE marca_id = ?");
+    $stmt->execute([$marca_id]);
+
+    $modelos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode($modelos);
+
+} catch (PDOException $e) {
+    echo json_encode([]);
+}
