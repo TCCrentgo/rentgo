@@ -1,0 +1,68 @@
+<?php
+session_start();
+require_once 'php/conexao.php';
+?>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simulação Cadastro Cartão</title>
+</head>
+<body>
+  <h2>Cadastro Simulado de Cartão</h2>
+  <form id="cardForm">
+    <input type="text" id="cardNumber" placeholder="Número do cartão" maxlength="16" required /><br/>
+    <input type="text" id="cardExpirationMonth" placeholder="Mês validade (MM)" maxlength="2" required /><br/>
+    <input type="text" id="cardExpirationYear" placeholder="Ano validade (AAAA)" maxlength="4" required /><br/>
+    <input type="text" id="cardholderName" placeholder="Nome impresso" required /><br/>
+    <button type="submit">Salvar Cartão</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('cardForm');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const cardNumber = document.getElementById('cardNumber').value.trim();
+      const month = document.getElementById('cardExpirationMonth').value.trim();
+      const year = document.getElementById('cardExpirationYear').value.trim();
+      const name = document.getElementById('cardholderName').value.trim();
+
+      // Validação simples
+      if(cardNumber.length !== 16 || isNaN(cardNumber)) {
+        alert('Número do cartão inválido');
+        return;
+      }
+      if(month.length !== 2 || isNaN(month) || month < 1 || month > 12) {
+        alert('Mês inválido');
+        return;
+      }
+      if(year.length !== 4 || isNaN(year)) {
+        alert('Ano inválido');
+        return;
+      }
+
+      // Enviar para backend (não enviamos número completo no exemplo real, mas aqui é simulado)
+      const response = await fetch('php/salvar_cartao.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          cardNumber,
+          month,
+          year,
+          name
+        })
+      });
+
+      const data = await response.json();
+      if(data.success) {
+        alert('Cartão salvo com token: ' + data.token);
+      } else {
+        alert('Erro: ' + data.message);
+      }
+    });
+  </script>
+</body>
+</html>
